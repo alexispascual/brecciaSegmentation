@@ -2,6 +2,9 @@ import os
 import cv2
 import numpy as np
 
+from keras.models import Sequential
+from keras.layers import Dense
+
 groundTruthFilePath = "groundTruth.tif"
 originalImageFilePath = "originalImage.tif"
 
@@ -80,8 +83,6 @@ for matrixPixel in matrixPixelCoordinates:
 		print("Text pixel, skipping")
 
 	else: 	
-
-		
 		
 		if (len(x_test) < 2*trainPixels):
 			x_test.append(originalImage[xTestRow][xTestCol])
@@ -105,4 +106,12 @@ print(x_test.shape)
 print(y_test.shape)
 print(x_val.shape)
 print(y_val.shape)
+
+model = Sequential()
+
+model.add(Dense(units=64, activation="sigmoid", input_dim=3))
+
+
+
+
 
