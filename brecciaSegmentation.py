@@ -3,7 +3,11 @@ import cv2
 import numpy as np
 
 from keras.models import Sequential
-from keras.layers import Dense
+from keras.layers import Dense, Dropout
+from keras import optimizers
+
+# Import Callbacks
+from keras.callbacks import ModelCheckpoint
 
 groundTruthFilePath = "groundTruth.tif"
 originalImageFilePath = "originalImage.tif"
@@ -52,9 +56,11 @@ for clastPixel in clastPixelCoordinates:
 
 		print("Background pixel, skipping")
 
-	else: 	
+	elif all(0 == pixel for pixel in originalImage[xTestRow][xTestCol]):
 
-		
+		print("Text pixel, skipping")
+
+	else: 	
 
 		if (len(x_test) < trainPixels):
 
@@ -64,7 +70,7 @@ for clastPixel in clastPixelCoordinates:
 		else:
 
 			x_val.append(originalImage[xTestRow][xTestCol])
-			y_val.append([1,0])
+			y_val.append([1, 0])
 
 	if (len(x_val) > trainPixels):
 
@@ -90,7 +96,7 @@ for matrixPixel in matrixPixelCoordinates:
 
 		else:
 			x_val.append(originalImage[xTestRow][xTestCol])
-			y_val.append([0,1])
+			y_val.append([0, 1])
 
 	if (len(x_val) > 2*trainPixels):
 		
@@ -99,8 +105,12 @@ for matrixPixel in matrixPixelCoordinates:
 x_test = np.array(x_test)
 y_test = np.array(y_test)
 
+#x_test = np.multiply(x_test, 1.0 / 255.0)
+
 x_val = np.array(x_val)
 y_val = np.array(y_val)
+
+#x_val = np.multiply(x_val, 1.0 / 255.0)
 
 print(x_test.shape)
 print(y_test.shape)
@@ -109,8 +119,28 @@ print(y_val.shape)
 
 model = Sequential()
 
-model.add(Dense(units=64, activation="sigmoid", input_dim=3))
+model.add(Dense(units=64, activation="tanh", input_dim=3))
+#model.add(Dense(units=64, activation="tanh"))
+model.add(Dense(units=2, activation="sigmoid"))
 
+# Define Adam optimizer
+adam = optimizers.Adam(lr=0.0001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
+
+checkpointer = ModelCheckpoint(filepath="modelBrecciaSegmentation.h5", verbose=1, save_best_only=True)
+
+model.compile(
+	optimizer=adam,
+	loss='binary_crossentropy',
+	metrics=['accuracy'])
+
+model.fit(
+	x_test,
+	y_test, 
+	epochs = 10, 
+	batch_size=32,
+	shuffle=True,
+	validation_data=(x_val, y_val),
+	callbacks=[checkpointer])
 
 
 

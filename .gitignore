@@ -1,0 +1,15 @@
+# Ignore Training Folders
+
+/train3x3
+/train5x5
+/train7x7
+/train11x11
+
+# Ignore Trained Models
+
+/Trained Models
+
+# Ignore virtualenv
+
+/brecciaSegmentation
+
